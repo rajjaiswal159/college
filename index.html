@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📚 Top 30 Books</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 0;
+      color: #3e2723;
+    }
+
+    header {
+      background: #3e2723;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .project-name {
+      font-size: 24px;
+      font-weight: bold;
+      color: #ff7043;
+    }
+
+    input[type="text"] {
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #8d6e63;
+      background: #fff;
+      color: #3e2723;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .search-btn {
+      padding: 8px 14px;
+      border-radius: 6px;
+      border: none;
+      background: linear-gradient(45deg, #ff7043, #ff8a65);
+      color: #fff;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease, box-shadow 0.2s ease;
+    }
+
+    .search-btn:hover {
+     transform: scale(1.05);
+     box-shadow: 0 4px 12px rgba(255,112,67, 0.5,);
+    }
+
+    h1 {
+      text-align: center;
+      margin: 20px 0;
+      color: #6d4c41;
+      font-size: 40px;
+    }
+
+    .book-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 35px;
+      padding: 20px;
+      max-width: 1300px;
+      margin: auto;
+    }
+
+    .book-card {
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 440px;
+      width: 240px;
+      padding: 4px;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+    }
+
+    .book-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .book-card img {
+      width: 100%;
+      height: 250px;
+      object-fit: cover;
+    }
+
+    .book-details {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 10px 12px;
+      text-align: left;
+    }
+
+    .book-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin: 0 0 8px;
+      color: #3e2723;
+      text-align: center;
+    }
+
+    .book-info {
+      font-size: 14px;
+      margin: 2px 0;
+      color: #6d4c41;
+    }
+
+    .book-rating {
+      color: #ff8a65;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="project-name">📚 BookBazar</div>
+    <div style="display: flex; gap: 8px;">
+      <input type="text" placeholder="Search books...">
+      <button class="search-btn">Search</button>
+    </div>
+  </header>
+
+  <h1>🌟 Top 30 Books</h1>
+
+  <div class="book-container" id="bookContainer">
+    <p style="text-align:center; color:gray;">Loading books...</p>
+  </div>
+
+  <script>
+  async function fetchBooks(query = "") {
+    try {
+      const url = query
+        ? `http://127.0.0.1:8000/api/books/search?query=${encodeURIComponent(query)}`
+        : `http://127.0.0.1:8000/api/books`;
+
+      const response = await fetch(url);
+      const books = await response.json();
+
+      const container = document.getElementById("bookContainer");
+      container.innerHTML = "";
+
+      if (books.message) {
+        container.innerHTML = `<p style="text-align:center; color:gray;">${books.message}</p>`;
+        return;
+      }
+
+      books.forEach(book => {
+        const card = document.createElement("div");
+        card.classList.add("book-card");
+
+        const price = `₹${[199, 249, 299, 349, 559, 699, 749][Math.floor(Math.random() * 7)]}`;
+
+        card.innerHTML = `
+          <img src="${book.image_url}" alt="${book.title}">
+          <div class="book-details">
+            <p class="book-title">${book.title}</p>
+            <p class="book-info"><strong>Author:</strong> ${book.author}</p>
+            <p class="book-info"><strong>Year:</strong> ${book.year}</p>
+            <p class="book-info"><strong>Rating:</strong> <span class="book-rating">⭐ ${book.average_rating}</span></p>
+            <p class="book-info"><strong>Price:</strong> <span class="book-price">${price}</span></p>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    } catch (err) {
+      console.error("Error fetching books:", err);
+      document.getElementById("bookContainer").innerHTML =
+        "<p style='color:red; text-align:center;'>Failed to load books.</p>";
+    }
+  }
+
+  // Attach search button click event
+  document.querySelector(".search-btn").addEventListener("click", () => {
+    const searchValue = document.querySelector("input[type='text']").value.trim();
+    fetchBooks(searchValue);
+  });
+
+  // Load all books initially
+  fetchBooks();
+</script>
+
+</body>
+
+</html>
